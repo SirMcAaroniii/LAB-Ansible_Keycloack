@@ -1,0 +1,45 @@
+- name: Configuration OpenID Connect
+  ansible.builtin.blockinfile:
+    path: /etc/gitlab/gitlab.rb
+    block: |
+       gitlab_rails['omniauth_providers'] = [{
+            name: "openid_connect",
+            label: "Keycloak",
+            args: {
+              name: "openid_connect",
+              scope: ["openid", "profile", "email"],
+              response_type: "code",
+              issuer: "https://192.168.50.231:8443/realms/Gitlab_Auth",
+              autorization_endpoint: "https://192.168.50.231:8443/realms/Gitlab_Auth/protocol/openid-connect/auth",
+              client_auth_method: "query",
+              discovery: true,
+              uid_field: "preferred_username",
+              pkce: true,
+              client_options: {
+                identifier: "Gitlab",
+                secret: "REALLYWELLKEPTSECRET",
+                redirect_uri: "https://192.168.50.230/users/auth/openid_connect/callback",
+                ssl:{
+                  verify: false
+                }
+              }}}]
+          nginx['enable'] = true
+          nginx['listen_https'] = true
+          nginx['ssl_protocols'] = 'TLSv1.2 TLSv1.3'
+          nginx['ssl_ciphers'] = 'TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384'
+          gitlab_rails['omniauth_enabled'] = true
+          gitlab_rails['omniauth_allow_single_sign_on'] = ['openid_connect']
+          gitlab_rails['omniauth_auto_link_user'] = ['openid_connect']
+          gitlab_rails['omniauth_external_providers'] = ['openid_connect']
+          gitlab_rails['omniauth_block_auto_created_users'] = false
+  become: true
+  become_user: root
+
+- name: Redémarrer le service GitLab 2
+  ansible.builtin.command:
+    cmd: sudo gitlab-ctl reconfigure 
+  ignore_errors: true
+
+- name: Redémarrer le service GitLab 3
+  ansible.builtin.command:
+    cmd: sudo gitlab-ctl restart

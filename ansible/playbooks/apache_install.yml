@@ -1,0 +1,6 @@
+---
+- name : Install Apache et config
+  hosts : SRV-Apache
+  tasks :
+    - ansible.builtin.include_role:
+        name : apache

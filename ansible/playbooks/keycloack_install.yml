@@ -1,0 +1,6 @@
+---
+- name : Install Keycloak
+  hosts : SRV-Keycloak
+  tasks :
+    - ansible.builtin.include_role:
+        name : keycloack

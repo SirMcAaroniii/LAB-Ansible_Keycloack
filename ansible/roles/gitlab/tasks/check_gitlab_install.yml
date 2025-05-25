@@ -1,0 +1,14 @@
+- name: Check if Gitlab configuration file already exists.
+  ansible.builtin.stat:
+    path: /etc/gitlab/gitlab.rb
+  register: gitlab_configuration
+
+- name: Check if Gitlab is already installed.
+  ansible.builtin.stat:
+    path: /usr/bin/gitlab-clt
+  register: gitlab_bin
+
+- name: Display gitlab installation status
+  ansible.builtin.debug:
+    msg: "Gitlab is already installed, skip the installation."
+  when: gitlab_installation.stat.exists

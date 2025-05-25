@@ -1,0 +1,16 @@
+# tasks file for gitlab
+#- name: Installe les prérequis 
+#  ansible.builtin.include_tasks: install_requirements.yml
+
+#- name: Installe Keycloak
+#  ansible.builtin.include_tasks: install_keycloak.yml
+
+#- name: Configure Keycloak
+#  ansible.builtin.include_tasks: set_keycloak.yml 
+
+- name: Configurer le SSO 
+  ansible.builtin.include_tasks: set_sso.yml
+
+- name: Envoi data
+  ansible.builtin.include_tasks: envoi_data.yml
+  

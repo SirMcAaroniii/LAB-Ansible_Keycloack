@@ -1,0 +1,7 @@
+---
+# tasks file for gitlab
+- name: Include install_requirements
+  ansible.builtin.include_tasks: install_requirements.yml
+
+- name: Include install_requirements
+  ansible.builtin.include_tasks: install_gitlab.yml

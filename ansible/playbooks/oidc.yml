@@ -1,0 +1,6 @@
+---
+- name : Install OIDC
+  hosts : SRV-Gitlab
+  tasks :
+    - ansible.builtin.include_role:
+        name : oidc

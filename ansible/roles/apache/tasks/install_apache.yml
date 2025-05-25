@@ -1,0 +1,77 @@
+- name: Install Apache
+  ansible.builtin.apt:
+    name: apache2
+    state: present
+  when: ansible_os_family == 'Debian'
+
+- name: Activation Proxy_HTTP
+  ansible.builtin.command:
+    cmd: a2enmod proxy_http
+
+- name: Restart Apache
+  ansible.builtin.command:
+    cmd: service apache2 restart
+
+- name: Création du site Gitlab_agora
+  ansible.builtin.command:
+    cmd: touch /etc/apache2/sites-avaliable/gitlab_agora.com
+
+- name: Ajouter la ligne dans gitlab_agora.com
+  ansible.builtin.blockinfile:
+    path: /etc/apache2/sites-avaliable/gitlab_agora.com
+    block: |
+      < VirtualHost *:80 >
+        ServerName www.gitlab_agora.com
+        ProxyPreserveHost On
+        ProxyRequests On
+        ProxyPass / https://192.168.50.230/
+        ProxyPassReverse / https://192.168.50.230
+      < /VirtualHost >
+
+- name: Activation site Gitlab
+  ansible.builtin.command:
+    cmd: a2enmod gitlab_agora.com
+
+- name: Création du site Keycloak_agora
+  ansible.builtin.command:
+    cmd: touch /etc/apache2/sites-avaliable/keycloak_agora.com
+
+- name: Ajouter la ligne dans keycloak_agora.com
+  ansible.builtin.blockinfile:
+    path: /etc/apache2/sites-avaliable/keycloak_agora.com
+    block: |
+      < VirtualHost *:80 >
+        ServerName www.keycloak_agora.com
+        ProxyPreserveHost On
+        ProxyRequests On
+        ProxyPass / https://192.168.50.231:8443/
+        ProxyPassReverse / https://192.168.50.231:8443
+      < /VirtualHost >
+
+- name: Activation site Keycloak
+  ansible.builtin.command:
+    cmd: a2enmod keycloak_agora.com
+
+- name: Création du site Wordpress
+  ansible.builtin.command:
+    cmd: touch /etc/apache2/sites-avaliable/wordpress_agora.com
+
+- name: Ajouter la ligne dans wordpress_agora.com
+  ansible.builtin.blockinfile:
+    path: /etc/apache2/sites-avaliable/wordpress_agora.com
+    block: |
+      < VirtualHost *:80 >
+        ServerName www.wordpress_agora.com
+        ProxyPreserveHost On
+        ProxyRequests On
+        ProxyPass / https://192.168.50.232/
+        ProxyPassReverse / https://192.168.50.232
+      < /VirtualHost >
+
+- name: Activation site Wordpress
+  ansible.builtin.command:
+    cmd: a2enmod wordpress_agora.com
+
+- name: Redémarrage Apache
+  ansible.builtin.command:
+    cmd: service apache2 reload

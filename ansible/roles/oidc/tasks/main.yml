@@ -1,0 +1,3 @@
+# tasks file for OIDC
+- name: Configuration sur Gitlab serveur
+  ansible.builtin.include_tasks: set_oidc.yml

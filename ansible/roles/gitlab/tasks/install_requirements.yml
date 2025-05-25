@@ -1,0 +1,6 @@
+- name: Update & Upgrade server
+  ansible.builtin.package:
+      name: "{{ package }}"
+  loop: "{{ required_packages }}"
+  loop_control:
+    loop_var: package

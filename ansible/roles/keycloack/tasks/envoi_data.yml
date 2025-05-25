@@ -1,0 +1,17 @@
+# Envoi des certificats srv keycloack vers Gitlab pour trusts_certs
+- name: Lire le contenu du certificat depuis SRV-Keycloak
+  ansible.builtin.slurp:
+    src: /etc/keycloak/certs/keycloak.pem
+  register: keycloak_cert
+
+- name: Copier le certificat sur le serveur GitLab
+  ansible.builtin.copy:
+    content: "{{ keycloak_cert.content | b64decode }}"
+    dest: /etc/gitlab/trusted-certs/keycloak.pem
+    owner: root
+    group: root
+    mode: '0644'
+  delegate_to: 192.168.50.230
+  remote_user: anais 
+  become: true
+  become_user: root

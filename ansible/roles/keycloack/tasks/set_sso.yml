@@ -1,0 +1,61 @@
+- name: Create or update Keycloak Realm Gitlab_Auth
+  community.general.keycloak_realm:
+    auth_client_id: admin-cli
+    auth_keycloak_url: https://192.168.50.231:8443
+    auth_realm: master
+    auth_username: admin
+    auth_password: password
+    realm: Gitlab_Auth
+    state: present
+    validate_certs: no
+
+- name: Create a user anais
+  community.general.keycloak_user:
+    auth_keycloak_url: https://192.168.50.231:8443
+    auth_username: admin
+    auth_password: password
+    auth_realm: master
+    realm: Gitlab_Auth
+    username: anais
+    firstName: anais
+    lastName: anais
+    email: anais@anais.com
+    enabled: true
+    emailVerified: false
+    credentials:
+      - type: password
+        value: password
+        temporary: false
+    validate_certs: no
+    state: present
+
+- name: Create or update Keycloak client Gitlab
+  community.general.keycloak_client:
+    auth_keycloak_url: https://192.168.50.231:8443
+    auth_realm: master
+    auth_username: admin
+    auth_password: password
+    realm: Gitlab_Auth
+    client_id: Gitlab
+    public_client: false
+    secret: REALLYWELLKEPTSECRET
+    redirect_uris:
+    - https://192.168.50.230/users/auth/openid_connect/callback
+    authorization_services_enabled: true
+    service_accounts_enabled: true
+    standard_flow_enabled: true
+    state: present
+    validate_certs: no
+  delegate_to: localhost
+
+# Activation du realm
+- name: Activer le realm Gitlab_Auth
+  community.general.keycloak_realm:
+    auth_keycloak_url: "https://192.168.50.231:8443"
+    realm: Gitlab_Auth
+    state: present
+    enabled: true
+    auth_realm: master
+    auth_username: admin
+    auth_password: password
+    validate_certs: no  

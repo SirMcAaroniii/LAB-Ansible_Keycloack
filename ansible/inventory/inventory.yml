@@ -1,0 +1,6 @@
+all:
+  hosts :
+    SRV-Gitlab:
+    SRV-Keycloak:
+    SRV-Apache: 
+    SRV-PfSense:

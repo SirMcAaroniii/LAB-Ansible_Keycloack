@@ -1,0 +1,8 @@
+---
+ansible_host : "192.168.50.230"
+ansible_user : "anais"
+ansible_password : "anais"
+
+ansible_become : true
+ansible_become_method : sudo 
+ansible_become_pass : "anais"

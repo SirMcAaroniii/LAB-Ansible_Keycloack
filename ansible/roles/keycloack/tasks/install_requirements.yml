@@ -1,0 +1,3 @@
+- name: Install des prérequis
+  ansible.builtin.apt:
+      name: default-jdk

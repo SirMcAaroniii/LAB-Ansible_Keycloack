@@ -1,0 +1,99 @@
+- name: Création du groupe keycloak
+  ansible.builtin.group:
+    name: keycloak
+    state: present
+
+- name: Création de l'utilisateur keycloak
+  ansible.builtin.user:
+    name: keycloak
+    groups: keycloak
+    shell: /bin/bash
+    state: present
+    create_home: yes 
+
+- name: Création du dossier /etc/keycloak
+  ansible.builtin.command: 
+    cmd: mkdir /etc/keyclaok/ 
+
+- name: Copie de la conf dans etc
+  ansible.builtin.command: 
+    cmd: cp /opt/keycloak-20.0.0/conf/keycloak.conf /etc/keyclaok/ 
+
+- name: Modifier la ligne dans keycloak.conf pour hostname 
+  ansible.builtin.lineinfile: 
+    path: /etc/keyclaok/keycloak.conf
+    regexp: '^#?hostname'
+    line: 'hostname=192.168.50.231'
+    backup: yes
+
+- name: Appliquer les bonnes permissions à /etc/keycloak
+  ansible.builtin.file:
+    path: /etc/keycloak
+    owner: keycloak
+    group: keycloak
+    mode: '0755'
+    recurse: yes 
+
+
+- name: Donner les permissions 777 sur /opt/keycloak-20.0.0/bin
+  ansible.builtin.file:
+    path: /opt/keycloak-20.0.0/bin
+    mode: '0777'
+    recurse: yes 
+
+- name: Création keycloak.service
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/keycloak.service 
+    content: |
+      [Unit]
+      Description= The Keycloak Server
+      After=syslog.target network.target
+      Before=httpd.service
+
+      [Service]
+      Environment=LAUNCH_JBOSS_IN_BACKGROUND=1
+      EnvironmentFile=/etc/keycloak/keycloak.conf
+      User=keycloak
+      Group=keycloak
+      Type=simple
+      LimitNOFILE=102640
+      PIDFile=/var/run/keycloak/keycloak.pid
+      ExecStart=KEYCLOAK_ADMIN=admin KEYCLOAK_ADMIN_PASSWORD=password /opt/keycloak-20.0.0/bin/kc.sh start --hostname=192.168.50.20 --https-certificate-file=/etc/keycloak/certs/keycloak.pem --https-certificate-key-file=/etc/keycloak/certs/keycloak.key --https-port=8443 --http-enabled=false
+      StandardOutpu=null
+
+      [Install]
+      WantedBy=multi-user.target
+
+# Pour générer et appliquer le certificat
+- name: Configure Keycloak
+  ansible.builtin.command: 
+    cmd: mkdir /etc/keycloak/certs
+
+- name: Création de la clé privée
+  community.crypto.openssl_privatekey:
+    path: /etc/keycloak/certs/keycloak.key
+
+- name: Demande de requete 
+  community.crypto.openssl_csr_pipe:
+    privatekey_path: /etc/keycloak/certs/keycloak.key
+    common_name: '192.168.50.231'
+  register: csr
+
+- name: Création du certificat 
+  community.crypto.x509_certificate:
+    path: /etc/keycloak/certs/keycloak.pem
+    csr_content: "{{ csr.csr }}"
+    privatekey_path: /etc/keycloak/certs/keycloak.key
+    provider: selfsigned
+
+- name: Lancement du Deamon
+  ansible.builtin.command: 
+    cmd: systemctl daemon-reload
+
+- name: Activation Keycloak
+  ansible.builtin.command: 
+    cmd: systemctl enable keycloak
+
+- name: Serveur lancé en arrière plan
+  ansible.builtin.command: 
+    cmd: sudo KEYCLOAK_ADMIN=admin KEYCLOAK_ADMIN_PASSWORD=password /opt/keycloak-20.0.0/bin/kc.sh start --hostname=192.168.50.231 --https-certificate-file=/etc/keycloak/certs/keycloak.pem --https-certificate-key-file=/etc/keycloak/certs/keycloak.key --https-port=8443 --http-enabled=false &

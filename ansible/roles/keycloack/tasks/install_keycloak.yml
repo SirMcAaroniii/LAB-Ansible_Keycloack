@@ -1,0 +1,14 @@
+- name: Télécharger l'archive de Keycloak
+  ansible.builtin.get_url:
+    url: https://github.com/keycloak/keycloak/releases/download/20.0.0/keycloak-20.0.0.tar.gz
+    dest: /opt/keycloak-20.0.0.tar.gz
+
+- name: Décompresser l'archive
+  ansible.builtin.unarchive: 
+    src: /opt/keycloak-20.0.0.tar.gz
+    dest: /opt/
+    remote_src: yes
+
+#- name: Lancer Keycloak
+#  ansible.builtin.command: 
+#    cmd: ln -s keycloak-20.0.0 keycloak

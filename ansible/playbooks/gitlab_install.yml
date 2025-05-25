@@ -1,0 +1,6 @@
+---
+- name : Install Gitlab et config
+  hosts : SRV-Gitlab
+  tasks :
+    - ansible.builtin.include_role:
+        name : gitlab
